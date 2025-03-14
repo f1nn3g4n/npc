@@ -13,6 +13,7 @@ The data collected is used for:
     Managing characters and their respective permissions.
     Sending messages on behalf of characters through webhooks.
     Storing backups of character data in a designated backup channel within the server.
+    Tracking character data and inventory.
 
 4. Data Storage and Retention
 All data (character and user information) is stored:
@@ -22,7 +23,7 @@ All data (character and user information) is stored:
 No personal data is stored outside the Discord server or shared with third parties.
 
 5. Data Sharing
-The bot does not share any data with third-party services. All interactions and data storage remain within the Discord server where the bot is used.
+The bot does not share any data with third-party services. All interactions remain within the Discord server where the bot is used. The only stored information is character data on the server where the bot is hosted.
 
 6. User Control
 Server administrators can delete character data using the /delete_character command. Users with the appropriate permissions can manage, edit, and export character data at any time.
