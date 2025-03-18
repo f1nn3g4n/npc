@@ -4,7 +4,7 @@
 
 This Discord bot allows you to manage and interact with characters in your server. It supports creating, editing, and deleting characters, as well as sending messages as those characters using webhooks. It also provides functionality for exporting and importing character data to and from a backup channel.
 
-![Demo](https://github.com/f1nn3g4n/npc/blob/main/demo/demo.gif)
+![Demo](images/demo.gif)
 
 ## Features
 
@@ -19,32 +19,78 @@ This Discord bot allows you to manage and interact with characters in your serve
 
 ## Prerequisites
 
-- Python 3.8 or higher
-- `discord.py`, `pyyaml` and `aiohttp` libraries
+- [Docker](https://docs.docker.com/engine/install/)
 
-## Installation
+## Running the App Backend
 
 1. **Clone the Repository**
-
-2. **Install Python3 and Pip3**
-
-3. **Install Dependencies**:
-
+   
    ```bash
-   pip3 install discord.py
+   git clone https://github.com/f1nn3g4n/npc.git
+   cd npc/
    ```
 
-4. **Set up your bot token in the os environment, or paste in file**
+2. **Set the environment variables**:
 
-## Usage
-
-1. **Run the Bot**:
+   Copy the `.env_example` file.
 
    ```bash
-   python3 bot.py
+   cp .env_example .env
    ```
 
-2. **Bot Commands**:
+   Edit the `.env` file. It should work out-of-the-box as long as you provide a valid Discord app token, but it's a good idea to change the `ORACLE_PASSWORD`.
+
+3. **Run Docker Compose**
+
+   ```bash
+   docker compose up -d
+   ```
+   
+   This will spin up the docker containers that runs the Discord bot and the Oracle database it uses to store its data.
+
+## Viewing the log output
+
+   ```bash
+   docker compose logs -f
+   ```
+
+This will show the logs for both the bot and the database.
+
+If you want to just see the logs from the bot, run:
+
+   ```bash
+   docker compose logs -f npc_bot_app
+   ```
+
+## Stopping the App Backend
+
+   ```bash
+   docker compose down
+   ```
+
+## Installing the app to your server
+
+1. **Create a Discord App**
+
+   Create a Discord App in the [Discord Developer Portal](https://discord.com/developers/applications).
+   
+2. **Get the app token**
+
+   Get the app's token under Settings > Bot > Token. You can only see the token once when you generate it. If you lose it you have to make a new one. This needs to be put into your `.env` file of the backend.
+
+3. **Find App Client ID**
+
+   The `client_id` should be under OAuth2 > Client Information. It is the same as the Application ID under General Information.
+
+4. **Enter the install link in your browser**
+
+   Replace the `{client_id}` in the link below with your own and enter it into your browser. It should redirect to Discord and prompt you to choose a server to install it on and approve the permissions.
+
+   `https://discord.com/oauth2/authorize?client_id={client_id}&permissions=564034970057808&integration_type=0&scope=bot+applications.commands`
+
+   The permissions asked for are set by the `permissions` integer in the link. You can see the permissions in the [Configuration section](#configuration).
+
+## Bot Commands
 
    - `/create_character <name> <image_url> <background>`: Create a new character.
    - `/delete_character <name>`: Delete a character.
@@ -65,6 +111,12 @@ This Discord bot allows you to manage and interact with characters in your serve
 
 ## Configuration
 
+### Discord Permissions
+
+Below you can see the bot permissions that were enabled during development.
+
+![Bot Permissions](images/bot_permissions.png)
+
 ### Backup Channel
 
 The bot uses a specific text channel named `npc-character-backup` for backing up and restoring character data. If this channel doesn't exist, the bot will create it.
@@ -72,7 +124,7 @@ The bot uses a specific text channel named `npc-character-backup` for backing up
 ### Environment Variables
 
 - **DISCORD_TOKEN**: Your Discord bot token. Make sure this is set in your environment.
-- **Oracle DB information**: This bot is designed to use an Oracle Cloud DB in Light mode. Copy `example-config.yml` and rename to `config.yml` with your DB information.
+- **Oracle DB information**: This bot is designed to use an Oracle Cloud DB. The Docker configuration uses [gvenzl/oracle-free](https://github.com/gvenzl/oci-oracle-free).
 
 ## Troubleshooting
 

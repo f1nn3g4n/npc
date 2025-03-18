@@ -1,0 +1,35 @@
+services:
+  npc_oracle_db:
+    image: gvenzl/oracle-free
+    container_name: npc-oracle-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "1521:1521"
+    healthcheck:
+      test: ["CMD", "sqlplus", "-L", "sys/${ORACLE_PASSWORD}@${ORACLE_DSN} as sysdba", "@/opt/oracle/scripts/startup.sql"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+
+  npc_bot_app:
+    build: .
+    container_name: npc-bot-app
+    restart: unless-stopped
+    depends_on:
+      npc_oracle_db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - .:/app
+    command: ["python", "bot.py"]
+
+volumes:
+  oracle-data:
+

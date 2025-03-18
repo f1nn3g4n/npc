@@ -1,4 +1,0 @@
-oracle_db:
-  user: "your_username"
-  password: "your_password"
-  dsn: "your_database_name"

@@ -1,7 +1,9 @@
 import discord
 from discord.ext import commands
 from commands import * 
+from db_migrations import run_migrations
 import os
+import time
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -12,6 +14,8 @@ bot = commands.Bot(command_prefix='/', intents=intents)
 async def on_ready():
     await bot.tree.sync()  # Sync the / commands with Discord
     create_character_table()
+
+    run_migrations.main()
 
 def create_character_table():
     connection = create_oracle_connection()
@@ -37,6 +41,7 @@ def create_character_table():
         connection.commit()
     cursor.close()
     connection.close()
+    print("Characters table created successfully.")
 
 ### CHARACTER COMMANDS ###
 bot.tree.add_command(create_character)

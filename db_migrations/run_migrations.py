@@ -52,6 +52,10 @@ def add_migration_to_table(file, hash):
     cursor.close()
 
 def main():
+    # Ensure current directory is db_migrations
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(current_dir)
+
     # check if migrations table exists, create if not
     print('Checking if migrations table exists...', flush=True)
     connection = create_oracle_connection()
@@ -80,7 +84,11 @@ def main():
             add_migration_to_table(file, hash)
             print(f"Migration {file} has been run successfully")
     print('All migrations have been run successfully')
-    sys.exit(0)
+
+    connection.close()
+    
+    # Move back to parent directory
+    os.chdir('..')
 
 if __name__ == '__main__':
     main()

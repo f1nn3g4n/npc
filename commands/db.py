@@ -3,21 +3,14 @@ from discord import app_commands
 import json
 import os
 import oracledb
-import yaml
 
 BACKUP_CHANNEL = 'npc-character-backup'
 
-def load_config():
-    with open("./db-info/config.yml", "r") as file:
-        return yaml.safe_load(file)
-
-config = load_config()
-
 def create_oracle_connection():
     connection = oracledb.connect(
-        user=config['oracle_db']['user'],
-        password=config['oracle_db']['password'],
-        dsn=config['oracle_db']['dsn'],
+        user=os.environ.get('ORACLE_USER'),
+        password=os.environ.get('ORACLE_PASSWORD'),
+        dsn=os.environ.get('ORACLE_DSN'),
     )
     return connection
 
@@ -149,4 +142,3 @@ async def export_json_to_channel(channel, data):
 
     await channel.send(file=discord.File("characters.json"))
     os.remove("characters.json")
-    

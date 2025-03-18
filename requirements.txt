@@ -1,0 +1,5 @@
+oracledb
+discord.py
+pyyaml
+aiohttp
+
