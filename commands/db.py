@@ -27,7 +27,11 @@ async def create_backup_channel(guild: discord.Guild):
 
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        guild.me: discord.PermissionOverwrite(read_messages=True)
+        guild.me: discord.PermissionOverwrite(
+            read_messages=True,
+            send_messages=True, 
+            attach_files=True
+        )
     }
     channel = await guild.create_text_channel(BACKUP_CHANNEL, overwrites=overwrites)
     await channel.edit(topic="NPC-generated channel for storing character data backups.")
@@ -104,33 +108,38 @@ async def load_character_data(interaction: discord.Interaction, message: discord
         connection.close()
  
 @app_commands.command(name="export_characters_manual", description="Export the list of characters as JSON to the back up channel")
-async def export_characters_manual(interaction: discord.Interaction, send_messages: bool = True):
-    await export_characters(interaction, send_messages)
+async def export_characters_manual(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    await export_characters(interaction)
 
-async def export_characters(interaction, send_messages):
+async def export_characters(interaction: discord.Interaction):
     guild_id = str(interaction.guild_id)
+    
     connection = create_oracle_connection()
     cursor = connection.cursor()
+    
     cursor.execute('''
         SELECT character_name, owner_id, image_url, background, allowed_users
         FROM characters
         WHERE guild_id = :guild_id
     ''', {"guild_id": guild_id})
+    
     characters = cursor.fetchall()
+    
     if not characters or len(characters) == 0:
-        if send_messages:
-            await interaction.response.send_message("No characters to export.", ephemeral=True)
+        await interaction.response.send_message("No characters to export.", ephemeral=True)
         cursor.close()
         connection.close()
         return
 
     characters_data = {}
     for character in characters:
-        characters_data[character[0]] = {
-            "owner_id": character[1],
-            "image_url": character[2],
-            "background": character[3],
-            "allowed_users": json.loads(character[4].read())
+        character_name, owner_id, image_url, background, allowed_users = character
+        characters_data[character_name] = {
+            "owner_id": owner_id,
+            "image_url": image_url,
+            "background": background,
+            "allowed_users": json.loads(allowed_users.read())
         }
     cursor.close()
     connection.close()
@@ -138,8 +147,7 @@ async def export_characters(interaction, send_messages):
     private_channel = discord.utils.get(interaction.guild.text_channels, name=BACKUP_CHANNEL)
     if private_channel:
         await export_json_to_channel(private_channel, characters_data)
-        if send_messages:
-            await interaction.followup.send("Characters exported successfully.", ephemeral=True)
+        await interaction.followup.send("Characters exported successfully.", ephemeral=True)
     else:
         await interaction.followup.send("Backup channel not found. Please run /init", ephemeral=True)
 
@@ -149,4 +157,3 @@ async def export_json_to_channel(channel, data):
 
     await channel.send(file=discord.File("characters.json"))
     os.remove("characters.json")
-    
