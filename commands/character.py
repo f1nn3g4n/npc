@@ -243,6 +243,7 @@ async def view_character(interaction: discord.Interaction, character_name: str):
         return
     
     channel = interaction.channel
-    await db.export_json_to_channel(channel, {[character_name]: character})
+    await db.export_json_to_channel(channel, {character_name: character})
     msg = await interaction.followup.send('Success!', ephemeral=True)
     await msg.delete(delay=2)
+    
